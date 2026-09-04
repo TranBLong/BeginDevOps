@@ -22,4 +22,3 @@ jobs:
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/my-next-app:latest .
           docker push ${{ secrets.DOCKER_USERNAME }}/my-next-app:latest
-```[cite: 1]
