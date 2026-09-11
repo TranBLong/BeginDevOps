@@ -24,7 +24,7 @@ export default function UserPage() {
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
     if (!user) {
-      router.push('/login');
+      router.push('/');
     } else {
       // Bọc setState trong requestAnimationFrame để xử lý bất đồng bộ
       requestAnimationFrame(() => {
@@ -36,7 +36,7 @@ export default function UserPage() {
 
   const handleLogout = () => {
     localStorage.removeItem('currentUser');
-    router.push('/login');
+    router.push('/');
   };
 
   if (!currentUser) return null;

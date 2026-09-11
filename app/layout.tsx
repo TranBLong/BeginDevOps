@@ -16,11 +16,36 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   // Kiểm tra trạng thái đăng nhập mỗi khi chuyển trang
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+
+    // Kiểm tra tài khoản thường (không kiểm tra tài khoản Admin chính)
+    if (currentUser && currentUser.role !== 'admin') {
+      const appUsers = JSON.parse(localStorage.getItem('app_users') || '[]');
+      const dbUser = appUsers.find((u: any) => u.username === currentUser.username);
+
+      // 🛑 Nếu tài khoản không còn trong danh sách app_users (đã bị xóa)
+      if (!dbUser) {
+        alert('Tài khoản của bạn đã bị xóa khỏi hệ thống!');
+        localStorage.removeItem('currentUser');
+        setCurrentUser(null);
+        router.push('/');
+        return;
+      }
+
+      // 🛑 Nếu người dùng đang online mà bị Admin ấn khóa
+      if (dbUser.status === 'Tạm khóa') {
+        alert('Tài khoản của bạn đã bị Admin khóa!');
+        localStorage.removeItem('currentUser');
+        setCurrentUser(null);
+        router.push('/');
+        return;
+      }
+    }
+
     requestAnimationFrame(() => {
-      setCurrentUser(user);
+      setCurrentUser(currentUser);
     });
-  }, [pathname]);
+  }, [pathname, router]);
 
   const handleLogout = () => {
     localStorage.removeItem('currentUser');

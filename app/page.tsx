@@ -4,15 +4,17 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface UserAccount {
+  id?: number;
   username: string;
-  password: string;
+  password?: string;
   role: 'admin' | 'user';
+  status?: string;
 }
 
 // Tài khoản mặc định ban đầu
-const defaultUsers: UserAccount[] = [
-  { username: 'admin', password: '123', role: 'admin' },
-  { username: 'user', password: '123', role: 'user' },
+const defaultUsers = [
+  { id: 1, username: 'admin', password: '123', role: 'admin', status: 'Hoạt động' },
+  { id: 2, username: 'user', password: '123', role: 'user', status: 'Hoạt động' },
 ];
 
 export default function RootAuthPage() {
@@ -23,9 +25,9 @@ export default function RootAuthPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Khởi tạo danh sách tài khoản nếu chưa có trong localStorage
-    if (!localStorage.getItem('registeredUsers')) {
-      localStorage.setItem('registeredUsers', JSON.stringify(defaultUsers));
+    // Khởi tạo danh sách tài khoản nếu chưa có trong localStorage (key: app_users)
+    if (!localStorage.getItem('app_users')) {
+      localStorage.setItem('app_users', JSON.stringify(defaultUsers));
     }
 
     // Nếu đã đăng nhập trước đó, tự động chuyển đến trang tương ứng
@@ -40,25 +42,27 @@ export default function RootAuthPage() {
     e.preventDefault();
     setError('');
 
-    const users: UserAccount[] = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+    // 1. Đọc danh sách tài khoản đồng bộ từ key 'app_users'
+    const users: any[] = JSON.parse(localStorage.getItem('app_users') || '[]');
 
     if (isRegister) {
-      // 1. XỬ LÝ ĐĂNG KÝ (Tự động cấp quyền 'user')
+      // --- ĐĂNG KÝ TÀI KHOẢN ---
       if (users.some((u) => u.username.toLowerCase() === username.toLowerCase())) {
         setError('Tên đăng nhập này đã tồn tại!');
         return;
       }
 
-      const newUser: UserAccount = { username, password, role: 'user' };
+      const newUser = { id: Date.now(), username, password, role: 'user', status: 'Hoạt động' };
       users.push(newUser);
       
-      localStorage.setItem('registeredUsers', JSON.stringify(users));
-      localStorage.setItem('currentUser', JSON.stringify({ username, role: 'user' }));
+      // Lưu vào 'app_users'
+      localStorage.setItem('app_users', JSON.stringify(users));
+      localStorage.setItem('currentUser', JSON.stringify({ id: newUser.id, username, role: 'user' }));
 
       alert('Đăng ký tài khoản thành công!');
       router.push('/shop');
     } else {
-      // 2. XỬ LÝ ĐĂNG NHẬP
+      // --- ĐĂNG NHẬP ---
       const foundUser = users.find(
         (u) => u.username === username && u.password === password
       );
@@ -68,14 +72,21 @@ export default function RootAuthPage() {
         return;
       }
 
-      // Lưu thông tin người dùng đang đăng nhập
-      localStorage.setItem('currentUser', JSON.stringify({ username: foundUser.username, role: foundUser.role }));
+      if (foundUser.status === 'Tạm khóa') {
+        setError('Tài khoản của bạn đã bị khóa! Vui lòng liên hệ Admin.');
+        return;
+      }
 
-      // Điều hướng theo Role
+      localStorage.setItem('currentUser', JSON.stringify({ 
+        id: foundUser.id, 
+        username: foundUser.username, 
+        role: foundUser.role 
+      }));
+
       if (foundUser.role === 'admin') {
-        router.push('/admin'); // Chuyển đến trang Admin
+        router.push('/admin');
       } else {
-        router.push('/shop');  // Chuyển đến trang Mua sắm / Giỏ hàng
+        router.push('/shop');
       }
     }
   };

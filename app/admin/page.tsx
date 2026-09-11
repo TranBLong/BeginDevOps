@@ -19,6 +19,7 @@ interface Product {
 interface SystemUser {
   id: number;
   username: string;
+  password?: string;
   role: 'admin' | 'user';
   status: 'Hoạt động' | 'Tạm khóa';
 }
@@ -48,6 +49,7 @@ export default function AdminPage() {
   // --- STATE QUẢN LÝ NGƯỜI DÙNG ---
   const [systemUsers, setSystemUsers] = useState<SystemUser[]>([]);
   const [newUsername, setNewUsername] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [newRole, setNewRole] = useState<'admin' | 'user'>('user');
 
   const router = useRouter();
@@ -120,11 +122,12 @@ export default function AdminPage() {
       alert('Tên tài khoản này đã tồn tại!');
       return;
     }
-    const newUser: SystemUser = { id: Date.now(), username: newUsername, role: newRole, status: 'Hoạt động' };
+    const newUser: SystemUser = { id: Date.now(), username: newUsername, password: newPassword, role: newRole, status: 'Hoạt động' };
     const updated = [...systemUsers, newUser];
     setSystemUsers(updated);
     localStorage.setItem('app_users', JSON.stringify(updated));
     setNewUsername('');
+    setNewPassword('');
   };
 
   const toggleUserStatus = (id: number) => {
@@ -209,13 +212,35 @@ export default function AdminPage() {
       {/* --- TAB 2: QUẢN LÝ NGƯỜI DÙNG --- */}
       {activeTab === 'users' && (
         <div>
-          <form onSubmit={handleAddUser} style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', background: '#f8fafc', padding: '1rem', borderRadius: '6px', alignItems: 'center' }}>
+          <form onSubmit={handleAddUser} style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', background: '#f8fafc', padding: '1rem', borderRadius: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
             <h3 style={{ margin: 0, minWidth: '180px' }}>➕ Thêm người dùng:</h3>
-            <input type="text" placeholder="Tên tài khoản" value={newUsername} onChange={e => setNewUsername(e.target.value)} required style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
+            
+            {/* Ô nhập tên tài khoản */}
+            <input 
+              type="text" 
+              placeholder="Tên tài khoản" 
+              value={newUsername} 
+              onChange={e => setNewUsername(e.target.value)} 
+              required 
+              style={{ flex: 1, minWidth: '150px', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} 
+            />
+
+            {/* 🔑 Ô nhập mật khẩu mới */}
+            <input 
+              type="password" 
+              placeholder="Mật khẩu" 
+              value={newPassword} 
+              onChange={e => setNewPassword(e.target.value)} 
+              required 
+              style={{ flex: 1, minWidth: '150px', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} 
+            />
+
+            {/* Chọn vai trò */}
             <select value={newRole} onChange={e => setNewRole(e.target.value as 'admin' | 'user')} style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }}>
               <option value="user">User</option>
               <option value="admin">Admin</option>
             </select>
+
             <button type="submit" style={{ background: '#16a34a', color: '#fff', padding: '0.5rem 1rem', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Thêm</button>
           </form>
 
