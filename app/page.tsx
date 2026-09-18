@@ -108,7 +108,7 @@ export default function RootAuthPage() {
       <div style={{
         width: '100%',
         maxWidth: '440px',
-        background: '#ffffff',
+        background: '#e11010',
         borderRadius: '16px',
         boxShadow: '0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04)',
         border: '1px solid #f1f5f9',

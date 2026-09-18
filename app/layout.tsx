@@ -20,12 +20,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
     if (currentUser && currentUser.role !== 'admin') {
       const appUsers = JSON.parse(localStorage.getItem('app_users') || '[]');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const dbUser = appUsers.find((u: any) => u.username === currentUser.username);
 
       // Nếu tài khoản bị xóa
       if (!dbUser) {
         alert('Tài khoản của bạn đã bị xóa khỏi hệ thống!');
         localStorage.removeItem('currentUser');
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setCurrentUser(null);
         router.push('/');
         return;
